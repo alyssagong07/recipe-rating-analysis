@@ -24,9 +24,4 @@ The analysis investigates whether recipes that require more time, ingredients, o
 
 ### Distribution of Average Recipe Ratings
 
-<iframe
-  src="rating_distribution.html"
-  width="100%"
-  height="500"
-  style="border:none;">
-</iframe>
+<iframe src="rating_distribution.html" width="100%" height="500" style="border:none;"></iframe>
