@@ -1,5 +1,3 @@
-# What Makes a Recipe Highly Rated?
-
 **DSC 80 Project 4 — UC San Diego**
 
 **Author: Alyssa Gong**
@@ -8,7 +6,15 @@
 
 **Research question:** What characteristics of a recipe are associated with higher average user ratings?
 
+Online recipe platforms contain thousands of recipes, but it is not always clear what characteristics are associated with higher user ratings. Understanding these relationships can help readers make more informed choices when selecting recipes and provide insight into what makes a recipe appealing to users.
+
 This project investigates whether preparation time, ingredient count, and recipe complexity are associated with higher average ratings. I use exploratory data analysis, permutation tests, and predictive modeling on Food.com recipe and interaction data.
+
+The dataset contains **83,782 recipes** and **731,927 user interactions**. The relevant columns include:
+- `minutes`: the time required to prepare a recipe.
+- `n_ingredients`: the number of ingredients used in a recipe.
+- `n_steps`: the number of preparation steps.
+- `rating`: the average user rating for each recipe, calculated from recorded interactions.
 
 ## Data Cleaning and Exploratory Data Analysis
 
@@ -137,13 +143,27 @@ The baseline model was a linear regression model implemented in a scikit-learn P
 
 The slightly negative R² indicates that these features in a linear model explain essentially none of the variation in average recipe ratings. This provides a baseline against which to evaluate more complex models.
 
+All three features are quantitative, so no categorical encoding is necessary. This baseline provides a simple reference point for evaluating whether more complex models can improve predictive performance.
+
 ## Final Model
 
-I developed a Random Forest Regressor to capture potentially nonlinear relationships between recipe characteristics and ratings.
+I developed a **Random Forest Regressor** to capture potentially nonlinear relationships between recipe characteristics and ratings.
 
 First, I engineered six numerical features: preparation time, ingredient count, step count, log-transformed preparation time, description length, and tag count. I then added **11 binary recipe-category indicators** (including breakfast, desserts, vegetarian, and easy), resulting in 17 features total.
 
+These features were selected to capture different aspects of a recipe. Log-transformed preparation time helps represent potentially nonlinear relationships between cooking time and ratings. Description length and tag count provide additional measures of recipe detail, while binary category indicators capture differences between recipe types that may not be reflected by numerical features alone.
+
 I compared the six-feature and 17-feature models using three-fold cross-validation, then tuned the expanded model with `RandomizedSearchCV` over the number of trees, maximum depth, minimum leaf size, and feature sampling. All model selection and hyperparameter tuning used training data only.
+
+The best hyperparameters selected by `RandomizedSearchCV` were:
+- **Number of trees (`n_estimators`):** 150
+- **Maximum depth (`max_depth`):** 5
+- **Minimum samples per leaf (`min_samples_leaf`):** 5
+- **Maximum feature fraction (`max_features`):** 0.75
+
+The best cross-validation RMSE was approximately **0.6400**.
+
+I evaluated the final models on the held-out test set:
 
 | Model | Test RMSE | Test R² |
 |---|---:|---:|
