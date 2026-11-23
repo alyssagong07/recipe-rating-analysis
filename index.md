@@ -1,6 +1,7 @@
 # What Makes a Recipe Highly Rated?
 
 **DSC 80 Project 4 — UC San Diego**
+
 **Author: Alyssa Gong**
 
 ## Introduction
