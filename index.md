@@ -4,32 +4,132 @@
 
 ## Introduction
 
-What makes a recipe highly rated? This project explores how recipe characteristics, such as preparation time, number of ingredients, and number of steps, relate to user ratings.
+**Research question:** What characteristics of a recipe are associated with higher average user ratings?
 
-Using the Recipes and Ratings dataset, I investigate patterns in recipe ratings through exploratory data analysis, hypothesis testing, and predictive modeling.
+This project investigates whether preparation time, ingredient count, and recipe complexity are associated with higher average ratings. I use exploratory data analysis, permutation tests, and predictive modeling on Food.com recipe and interaction data.
 
 ## Data Cleaning and Exploratory Data Analysis
 
-The project uses two datasets from Food.com: a recipes dataset containing recipe characteristics and an interactions dataset containing user ratings. These datasets were merged using recipe IDs to connect each recipe with its average user rating.
+### Dataset and cleaning
 
-The cleaned dataset contains **83,782 recipes**, including **81,173 recipes with recorded average ratings** and **2,609 recipes without ratings**.
+The recipes dataset contains **83,782 recipes** and the interactions dataset contains **731,927 user interactions**. I replaced interaction ratings of zero with missing values because they do not represent valid numerical ratings, then computed the mean nonmissing rating for each recipe. A left merge on recipe ID retained all 83,782 recipes. Of these, **81,173 have a recorded average rating** and **2,609 (3.11%) do not**.
 
-The analysis focuses on preparation time (`minutes`), number of ingredients (`n_ingredients`), number of steps (`n_steps`), and average recipe rating (`rating`). These variables help investigate whether recipe complexity is associated with user ratings.
-
-### Exploratory Data Analysis
-
-I explored the relationships between recipe characteristics and average user ratings, focusing on preparation time, number of ingredients, and number of steps.
-
-The analysis investigates whether recipes that require more time, ingredients, or steps tend to receive higher or lower ratings. These comparisons help identify potential patterns and provide context for the hypothesis tests and predictive models developed later in the project.
+The analysis focuses on preparation time (`minutes`), ingredient count (`n_ingredients`), number of steps (`n_steps`), and average recipe rating (`rating`).
 
 ### Distribution of Average Recipe Ratings
 
 <iframe src="rating_distribution.html" width="100%" height="500" style="border:none;"></iframe>
 
-**Interpretation:** The distribution of average recipe ratings shows how ratings are spread across recipes. By examining the frequency of different ratings, we can understand the overall rating patterns in the dataset and establish context for investigating which recipe characteristics are associated with higher ratings.
+**Interpretation:** Ratings are strongly concentrated near five stars, with relatively few recipes averaging below four stars. This concentration makes meaningful differences between recipes harder to predict.
 
 ### Distribution of Recipe Preparation Times
 
 <iframe src="preparation_time_distribution.html" width="100%" height="500" style="border:none;"></iframe>
 
-**Interpretation:** The distribution of recipe preparation times is right-skewed, meaning most recipes take relatively little time to prepare, while fewer recipes require longer preparation times. This visualization focuses on recipes taking between 1 and 180 minutes to make the distribution easier to interpret.
+**Interpretation:** Preparation times are right-skewed. Most recipes take approximately 10–60 minutes, with a concentration around 20–40 minutes. The graph shows only times from 1 to 180 minutes for readability; this restriction does not change the underlying merged dataset.
+
+### Preparation Time vs. Average Rating
+
+<iframe src="rating_by_preparation_time.html" width="100%" height="500" style="border:none;"></iframe>
+
+**Interpretation:** Recipes taking 1–180 minutes are grouped into 15-minute intervals. Average ratings remain fairly steady, around 4.60–4.68 stars, without a clear upward or downward trend. The x-axis marks the start of each interval.
+
+### Ingredient Count vs. Average Rating
+
+<iframe src="rating_by_ingredient_count.html" width="100%" height="500" style="border:none;"></iframe>
+
+**Interpretation:** Among recipes with 1–30 ingredients, there is no consistent relationship between ingredient count and average rating. Ratings fluctuate more at high ingredient counts, where fewer recipes are available—for example, 8,657 recipes have eight ingredients, but only 11 have 30.
+
+### Quick vs. Long Recipes
+
+| Preparation time | Number of rated recipes | Mean rating |
+|---|---:|---:|
+| Quick (≤60 minutes) | 60,988 | 4.6293 |
+| Long (>60 minutes) | 20,184 | 4.6135 |
+
+Quick recipes are more common and have slightly higher average ratings, but the difference is only about **0.016 stars**.
+
+## Assessment of Missingness
+
+Missing values occur in `name` (1 recipe), `description` (70 recipes), and `rating` (2,609 recipes). Because rating is the prediction target, I examined whether its missingness is associated with observable recipe characteristics.
+
+### Missing Ratings and Preparation Time
+
+I compared the mean preparation times of recipes with and without recorded ratings, restricting this analysis to 1–180 minutes. Under the null hypothesis, the preparation-time distributions are the same in the two groups. I used the absolute difference in means as the test statistic and ran 1,000 permutations.
+
+| Group | Mean preparation time |
+|---|---:|
+| Recorded rating | 41.56 minutes |
+| Missing rating | 48.93 minutes |
+
+The observed difference was **7.37 minutes**, with a permutation **p-value ≈ 0.001**. At the 5% significance level, this is evidence against missing completely at random (MCAR). The association with an observed variable is consistent with possible MAR, but does not establish MAR rather than MNAR.
+
+### Missing Ratings and Breakfast Tag
+
+I also compared the proportions of missing ratings for breakfast-tagged and other recipes. The missing-rating rates were **3.08%** and **3.12%**, respectively. The absolute difference was approximately **0.00040**, with permutation **p = 0.8811**.
+
+This test does not find evidence of an association with the breakfast tag, though it does not prove independence. Because this comparison was selected after exploring multiple recipe characteristics, it should be treated as exploratory.
+
+## Hypothesis Testing
+
+I performed two two-sided permutation tests with 1,000 permutations each, using the absolute difference in mean ratings as the statistic and a 0.05 significance level.
+
+### Preparation Time and Ratings
+
+**Null hypothesis:** Quick recipes (≤60 minutes) and long recipes (>60 minutes) have equal mean ratings.
+
+The average ratings were **4.6293** for quick recipes and **4.6135** for long recipes, an absolute difference of **0.01585**. The permutation **p-value was 0.003**. This is statistically significant, but the difference is too small to suggest a substantial practical advantage for quick recipes.
+
+### Ingredient Count and Ratings
+
+**Null hypothesis:** Recipes with ≤10 ingredients and recipes with >10 ingredients have equal mean ratings.
+
+The average ratings were **4.6247** and **4.6268**, respectively, an absolute difference of **0.00209**. The permutation **p-value was 0.655**. There is insufficient evidence of a difference between these groups.
+
+Overall, neither preparation time nor ingredient count appears to have a strong standalone relationship with ratings.
+
+## Prediction Problem
+
+I aim to predict a recipe's **average user rating** from features known when the recipe is submitted, before user ratings are available. Because the target is continuous, this is a **regression** problem. I used an 80% training / 20% held-out test split (`random_state=42`) and evaluated performance with **root mean squared error (RMSE)** and **R²**. Lower RMSE indicates better predictions.
+
+## Baseline Model
+
+The baseline was a linear regression model using preparation time, ingredient count, and number of steps, implemented in a scikit-learn Pipeline.
+
+- **Test RMSE:** 0.6360
+- **Test R²:** −0.00042
+
+The slightly negative R² indicates that these features in a linear model explain essentially none of the variation in average ratings.
+
+## Final Model
+
+I developed a random forest regressor. First, I engineered six numerical features: preparation time, ingredient count, step count, log-transformed preparation time, description length, and tag count. I then added **11 binary recipe-category indicators** (including breakfast, desserts, vegetarian, and easy), for **17 features total**.
+
+I compared the six-feature and 17-feature models with three-fold cross-validation, then tuned the expanded model with `RandomizedSearchCV` over tree count, depth, minimum leaf size, and feature sampling. All tuning used training data only.
+
+| Model | Test RMSE | Test R² |
+|---|---:|---:|
+| Baseline linear regression | 0.6360 | −0.00042 |
+| Initial six-feature random forest | 0.6355 | — |
+| Tuned 17-feature random forest | **0.6340** | **0.00585** |
+
+The final model improved RMSE by approximately **0.314%** relative to the baseline. Although the tuned random forest performed slightly better, its R² indicates it explained only about **0.59%** of the variation in ratings. Recipe metadata alone is not a strong predictor of user ratings.
+
+## Fairness Analysis
+
+I compared the final model's prediction errors for **quick recipes (≤60 minutes)** and **long recipes (>60 minutes)** on the held-out test set. I used the difference in group RMSE (quick minus long) and a two-sided permutation test with 1,000 permutations.
+
+| Group | Test recipes | RMSE |
+|---|---:|---:|
+| Quick | 12,171 | 0.6243 |
+| Long | 4,064 | 0.6621 |
+
+The observed RMSE difference was **−0.0378**, indicating lower prediction error for quick recipes. The permutation **p-value was approximately 0.0480**, providing marginal evidence of a difference in predictive performance at the 5% significance level. This statistical difference does not by itself establish broader ethical unfairness.
+
+![Permutation distribution of the difference in RMSE between quick and long recipes](fairness_permutation.png)
+
+## Conclusion
+
+Recipe ratings are concentrated near the high end of the scale. Shorter recipes have a statistically detectable but very small advantage in mean rating, while ingredient count shows no significant difference in the tested groups. Rating missingness is associated with preparation time, so missingness should not automatically be treated as completely random.
+
+Predictive modeling reinforces the main finding: **preparation time, ingredients, steps, and category tags alone offer very limited ability to predict average ratings**. Individual preferences, review behavior, and other unmeasured factors likely play an important role. The final model also has slightly higher errors for longer recipes, an important limitation when interpreting its predictions.
