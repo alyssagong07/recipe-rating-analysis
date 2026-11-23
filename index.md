@@ -1,6 +1,7 @@
 # What Makes a Recipe Highly Rated?
 
 **DSC 80 Project 4 — UC San Diego**
+**Author: Alyssa Gong**
 
 ## Introduction
 
@@ -116,7 +117,7 @@ The average ratings were **4.6247** and **4.6268**, respectively, an absolute di
 
 Overall, neither preparation time nor ingredient count appears to have a strong standalone relationship with ratings.
 
-## Prediction Problem
+## Framing a Prediction Problem
 
 I aim to predict a recipe's **average user rating** from features known when the recipe is submitted, before user ratings are available. Because the target is continuous, this is a **regression** problem. I used an 80% training / 20% held-out test split (`random_state=42`) and evaluated performance with **root mean squared error (RMSE)** and **R²**. Lower RMSE indicates better predictions.
 
