@@ -25,3 +25,11 @@ The analysis investigates whether recipes that require more time, ingredients, o
 ### Distribution of Average Recipe Ratings
 
 <iframe src="rating_distribution.html" width="100%" height="500" style="border:none;"></iframe>
+
+**Interpretation:** The distribution of average recipe ratings shows how ratings are spread across recipes. By examining the frequency of different ratings, we can understand the overall rating patterns in the dataset and establish context for investigating which recipe characteristics are associated with higher ratings.
+
+### Distribution of Recipe Preparation Times
+
+<iframe src="preparation_time_distribution.html" width="100%" height="500" style="border:none;"></iframe>
+
+**Interpretation:** The distribution of recipe preparation times is right-skewed, meaning most recipes take relatively little time to prepare, while fewer recipes require longer preparation times. This visualization focuses on recipes taking between 1 and 180 minutes to make the distribution easier to interpret.
