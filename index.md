@@ -55,6 +55,14 @@ Missing values occur in `name` (1 recipe), `description` (70 recipes), and `rati
 
 ### Missing Ratings and Preparation Time
 
+<iframe
+  src="missingness_preparation_time.html"
+  width="100%"
+  height="500"
+  style="border:none;"
+  title="Recipe Preparation Time by Rating Missingness">
+</iframe>
+
 I compared the mean preparation times of recipes with and without recorded ratings, restricting this analysis to 1–180 minutes. Under the null hypothesis, the preparation-time distributions are the same in the two groups. I used the absolute difference in means as the test statistic and ran 1,000 permutations.
 
 | Group | Mean preparation time |
@@ -69,6 +77,12 @@ The observed difference was **7.37 minutes**, with a permutation **p-value ≈ 0
 I also compared the proportions of missing ratings for breakfast-tagged and other recipes. The missing-rating rates were **3.08%** and **3.12%**, respectively. The absolute difference was approximately **0.00040**, with permutation **p = 0.8811**.
 
 This test does not find evidence of an association with the breakfast tag, though it does not prove independence. Because this comparison was selected after exploring multiple recipe characteristics, it should be treated as exploratory.
+
+### NMAR Analysis
+
+One column that could potentially be **Not Missing At Random (NMAR)** is `rating`. Recipes without recorded ratings may be missing them because users are less motivated to rate recipes they did not enjoy, or because certain recipes receive less engagement overall. If the probability of a rating being missing depends on the unobserved rating itself, this would constitute NMAR missingness.
+
+However, we cannot determine whether ratings are NMAR from the observed data alone. Additional information, such as recipe views, cooking attempts, user engagement, and whether users chose not to leave ratings, could help explain why ratings are missing. If these observed variables accounted for the missingness, the mechanism might instead be considered Missing At Random (MAR).
 
 ## Hypothesis Testing
 
