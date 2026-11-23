@@ -132,7 +132,7 @@ Overall, neither preparation time nor ingredient count appears to have a strong 
 
 ## Framing a Prediction Problem
 
-I aim to predict a recipe's **average user rating** from features known when the recipe is submitted, before user ratings are available. Because the target is continuous, this is a **regression** problem. I used an 80% training / 20% held-out test split (`random_state=42`) and evaluated performance with **root mean squared error (RMSE)** and **R²**. Lower RMSE indicates better predictions.
+I aim to predict a recipe's **average user rating** from features known when the recipe is submitted, before user ratings are available. Because the target is continuous, this is a **regression** problem. I used an 80% training / 20% held-out test split (`random_state=42`) and evaluated performance with **root mean squared error (RMSE)** and **R²**. Lower RMSE indicates better predictions. I chose RMSE because it measures prediction error in the original rating scale and penalizes larger prediction errors more heavily, making it useful for evaluating this regression task.
 
 ## Baseline Model
 
@@ -143,7 +143,7 @@ The baseline model was a linear regression model implemented in a scikit-learn P
 
 The slightly negative R² indicates that these features in a linear model explain essentially none of the variation in average recipe ratings. This provides a baseline against which to evaluate more complex models.
 
-All three features are quantitative, so no categorical encoding is necessary. This baseline provides a simple reference point for evaluating whether more complex models can improve predictive performance.
+The model uses **3 quantitative features, 0 ordinal features, and 0 nominal features**. Since all predictors are numerical, no categorical encoding is necessary.
 
 ## Final Model
 
