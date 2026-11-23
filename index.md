@@ -104,15 +104,21 @@ However, we cannot determine whether ratings are NMAR from the observed data alo
 
 I performed two two-sided permutation tests with 1,000 permutations each, using the absolute difference in mean ratings as the statistic and a 0.05 significance level.
 
+For each test, I randomly shuffled the group labels while preserving the original group sizes, simulating the null hypothesis that the two groups have the same rating distribution. For each permutation, I recalculated the absolute difference in group means. The p-value is the proportion of simulated differences that were at least as large as the observed difference.
+
 ### Preparation Time and Ratings
 
 **Null hypothesis:** Quick recipes (≤60 minutes) and long recipes (>60 minutes) have equal mean ratings.
+
+**Alternative hypothesis (H₁):** Recipes taking 60 minutes or less and recipes taking more than 60 minutes have different population mean ratings.
 
 The average ratings were **4.6293** for quick recipes and **4.6135** for long recipes, an absolute difference of **0.01585**. The permutation **p-value was 0.003**. This is statistically significant, but the difference is too small to suggest a substantial practical advantage for quick recipes.
 
 ### Ingredient Count and Ratings
 
 **Null hypothesis:** Recipes with ≤10 ingredients and recipes with >10 ingredients have equal mean ratings.
+
+**Alternative hypothesis (H₁):** Recipes with 10 or fewer ingredients and recipes with more than 10 ingredients have different population mean ratings.
 
 The average ratings were **4.6247** and **4.6268**, respectively, an absolute difference of **0.00209**. The permutation **p-value was 0.655**. There is insufficient evidence of a difference between these groups.
 
@@ -124,18 +130,20 @@ I aim to predict a recipe's **average user rating** from features known when the
 
 ## Baseline Model
 
-The baseline was a linear regression model using preparation time, ingredient count, and number of steps, implemented in a scikit-learn Pipeline.
+The baseline model was a linear regression model implemented in a scikit-learn Pipeline. It used three quantitative features: preparation time, ingredient count, and number of steps. I split the data into 80% training data and 20% testing data, using `random_state=42`.
 
 - **Test RMSE:** 0.6360
 - **Test R²:** −0.00042
 
-The slightly negative R² indicates that these features in a linear model explain essentially none of the variation in average ratings.
+The slightly negative R² indicates that these features in a linear model explain essentially none of the variation in average recipe ratings. This provides a baseline against which to evaluate more complex models.
 
 ## Final Model
 
-I developed a random forest regressor. First, I engineered six numerical features: preparation time, ingredient count, step count, log-transformed preparation time, description length, and tag count. I then added **11 binary recipe-category indicators** (including breakfast, desserts, vegetarian, and easy), for **17 features total**.
+I developed a Random Forest Regressor to capture potentially nonlinear relationships between recipe characteristics and ratings.
 
-I compared the six-feature and 17-feature models with three-fold cross-validation, then tuned the expanded model with `RandomizedSearchCV` over tree count, depth, minimum leaf size, and feature sampling. All tuning used training data only.
+First, I engineered six numerical features: preparation time, ingredient count, step count, log-transformed preparation time, description length, and tag count. I then added **11 binary recipe-category indicators** (including breakfast, desserts, vegetarian, and easy), resulting in 17 features total.
+
+I compared the six-feature and 17-feature models using three-fold cross-validation, then tuned the expanded model with `RandomizedSearchCV` over the number of trees, maximum depth, minimum leaf size, and feature sampling. All model selection and hyperparameter tuning used training data only.
 
 | Model | Test RMSE | Test R² |
 |---|---:|---:|
@@ -143,18 +151,26 @@ I compared the six-feature and 17-feature models with three-fold cross-validatio
 | Initial six-feature random forest | 0.6355 | — |
 | Tuned 17-feature random forest | **0.6340** | **0.00585** |
 
-The final model improved RMSE by approximately **0.314%** relative to the baseline. Although the tuned random forest performed slightly better, its R² indicates it explained only about **0.59%** of the variation in ratings. Recipe metadata alone is not a strong predictor of user ratings.
+The final model improved RMSE by approximately **0.314%** relative to the baseline. Although the tuned Random Forest performed slightly better, its R² indicates that it explained only about **0.59%** of the variation in ratings. This suggests that recipe metadata alone is not a strong predictor of user ratings, and that other factors, such as individual preferences and reviewer behavior, may play a larger role.
 
 ## Fairness Analysis
 
 I compared the final model's prediction errors for **quick recipes (≤60 minutes)** and **long recipes (>60 minutes)** on the held-out test set. I used the difference in group RMSE (quick minus long) and a two-sided permutation test with 1,000 permutations.
+
+**Null hypothesis (H₀):** The distribution of squared prediction errors is the same for quick and long recipes.
+
+**Alternative hypothesis (H₁):** The distributions of squared prediction errors differ between the two groups.
+
+**Test statistic:** Difference in RMSE (quick recipes minus long recipes).
+
+**Significance level:** 0.05.
 
 | Group | Test recipes | RMSE |
 |---|---:|---:|
 | Quick | 12,171 | 0.6243 |
 | Long | 4,064 | 0.6621 |
 
-The observed RMSE difference was **−0.0378**, indicating lower prediction error for quick recipes. The permutation **p-value was approximately 0.0480**, providing marginal evidence of a difference in predictive performance at the 5% significance level. This statistical difference does not by itself establish broader ethical unfairness.
+The observed RMSE difference was **−0.0378**, indicating lower prediction error for quick recipes. The permutation **p-value was approximately 0.0480**. Since this is below the 0.05 significance level, I reject the null hypothesis. There is marginal statistical evidence that the model's prediction errors differ between quick and long recipes, with better observed predictive performance for quick recipes. However, this statistical difference does not by itself establish broader ethical unfairness.
 
 ![Permutation distribution of the difference in RMSE between quick and long recipes](fairness_permutation.png)
 
@@ -162,4 +178,6 @@ The observed RMSE difference was **−0.0378**, indicating lower prediction erro
 
 Recipe ratings are concentrated near the high end of the scale. Shorter recipes have a statistically detectable but very small advantage in mean rating, while ingredient count shows no significant difference in the tested groups. Rating missingness is associated with preparation time, so missingness should not automatically be treated as completely random.
 
-Predictive modeling reinforces the main finding: **preparation time, ingredients, steps, and category tags alone offer very limited ability to predict average ratings**. Individual preferences, review behavior, and other unmeasured factors likely play an important role. The final model also has slightly higher errors for longer recipes, an important limitation when interpreting its predictions.
+Predictive modeling reinforces the main finding: **preparation time, ingredients, steps, and category tags alone offer very limited ability to predict average ratings**. Individual preferences, review behavior, and other unmeasured factors likely play an important role.
+
+The fairness analysis also found marginal statistical evidence of different prediction errors between quick and long recipes, with the model performing slightly better on quick recipes. This highlights a limitation of the model and the importance of considering performance across different recipe groups.
