@@ -16,6 +16,20 @@ The recipes dataset contains **83,782 recipes** and the interactions dataset con
 
 The analysis focuses on preparation time (`minutes`), ingredient count (`n_ingredients`), number of steps (`n_steps`), and average recipe rating (`rating`).
 
+### Preview of the Cleaned Dataset
+
+After replacing zero ratings with missing values and merging the average ratings with the recipe information, the resulting dataset contains 83,782 recipes. The table below displays the first five rows, with selected columns for readability.
+
+| Recipe Name | Recipe ID | Minutes | Steps | Ingredients | Average Rating |
+|:---|---:|---:|---:|---:|---:|
+| 1 brownies in the world best ever | 333281 | 40 | 10 | 9 | 4 |
+| 1 in canada chocolate chip cookies | 453467 | 45 | 12 | 11 | 5 |
+| 412 broccoli casserole | 306168 | 40 | 6 | 9 | 5 |
+| millionaire pound cake | 286009 | 120 | 7 | 7 | 5 |
+| 2000 meatloaf | 475785 | 90 | 17 | 13 | 5 |
+
+*Only six of the dataset's columns are shown to keep the preview readable.*
+
 ### Distribution of Average Recipe Ratings
 
 <iframe src="rating_distribution.html" width="100%" height="500" style="border:none;"></iframe>
